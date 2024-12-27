@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Color Converter</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          'Helvetica Neue', Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f1f2f6;
+        color: #333;
+        overflow-x: hidden;
+      }
+
+      header {
+        text-align: center;
+        padding: 20px;
+        background: #007aff;
+        color: white;
+        /* position: sticky; */
+        /* top: 0; */
+        z-index: 1000;
+      }
+
+      .content {
+        padding: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .converter {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        box-sizing: border-box;
+        margin-bottom: 30px;
+        position: relative;
+      }
+
+      .converter h1 {
+        font-size: 1.6em;
+        margin-bottom: 20px;
+        text-align: center;
+        color: #333;
+      }
+
+      .converter .color-inputs {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .converter .color-inputs > div {
+        flex: 1;
+      }
+
+      .converter .color-hex {
+        margin-top: 10px;
+      }
+
+      .converter label {
+        font-weight: 600;
+        color: #555;
+      }
+
+      .converter input {
+        width: 100%;
+        padding: 10px;
+        font-size: 1em;
+        border: 1px solid #d1d1d6;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+        box-sizing: border-box;
+        -moz-appearance: textfield;
+        transition: border-color 0.3s;
+      }
+
+      .converter input:focus {
+        border-color: #007aff;
+        outline: none;
+        box-shadow: 0 0 5px rgba(0, 122, 255, 0.5);
+      }
+
+      .converter input::-webkit-outer-spin-button,
+      .converter input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+
+      .converter button {
+        width: 100%;
+        padding: 10px;
+        font-size: 1em;
+        background: #007aff;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-top: 15px;
+        font-weight: 600;
+        transition: background 0.3s;
+      }
+
+      .converter button:hover {
+        background: #005bb5;
+      }
+
+      .converter .result {
+        margin-top: 20px;
+        text-align: center;
+        font-size: 1.2em;
+        color: #333;
+        user-select: none;
+        cursor: pointer;
+      }
+
+      .converter .result:hover {
+        text-decoration: underline;
+      }
+
+      .converter .color-preview {
+        width: 100%;
+        height: 50px;
+        margin-top: 15px;
+        border: 1px solid #d1d1d6;
+        border-radius: 8px;
+        background-color: #ffffff;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      table th,
+      table td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
+
+      table th {
+        background: #007aff;
+        color: white;
+        font-weight: 600;
+      }
+
+      table tr:last-child td {
+        border-bottom: none;
+      }
+
+      table tr:hover {
+        background: #f9f9f9;
+      }
+
+      .scroll-effect {
+        animation: fadeInUp 0.5s ease-out;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Color Converter Tool</h1>
+    </header>
+
+    <div class="content">
+      <div class="converter">
+        <h1>Convert Colors</h1>
+        <div class="color-inputs">
+          <div>
+            <label for="red">Red (0-255):</label>
+            <input
+              type="number"
+              id="red"
+              min="0"
+              max="255"
+              placeholder="Enter Red"
+            />
+          </div>
+          <div>
+            <label for="green">Green (0-255):</label>
+            <input
+              type="number"
+              id="green"
+              min="0"
+              max="255"
+              placeholder="Enter Green"
+            />
+          </div>
+          <div>
+            <label for="blue">Blue (0-255):</label>
+            <input
+              type="number"
+              id="blue"
+              min="0"
+              max="255"
+              placeholder="Enter Blue"
+            />
+          </div>
+        </div>
+
+        <button onclick="convertToHex()">Convert to Hex</button>
+
+        <div class="color-hex">
+          <label for="hex">Hex Code:</label>
+          <input type="text" id="hex" placeholder="Enter Hex" />
+        </div>
+
+        <button onclick="convertToRGB()">Convert to RGB</button>
+
+        <div class="result" id="result" onclick="copyToClipboard()">
+          Result will be displayed here.
+        </div>
+        <div class="color-preview" id="colorPreview"></div>
+      </div>
+
+      <table class="scroll-effect">
+        <thead>
+          <tr>
+            <th>Color</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Hex</th>
+            <th>RGB</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="background-color: #ff0000"></td>
+            <td>Red</td>
+            <td>Bright Red</td>
+            <td>#FF0000</td>
+            <td>(255, 0, 0)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #00ff00"></td>
+            <td>Green</td>
+            <td>Bright Green</td>
+            <td>#00FF00</td>
+            <td>(0, 255, 0)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #0000ff"></td>
+            <td>Blue</td>
+            <td>Bright Blue</td>
+            <td>#0000FF</td>
+            <td>(0, 0, 255)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #ffff00"></td>
+            <td>Yellow</td>
+            <td>Bright Yellow</td>
+            <td>#FFFF00</td>
+            <td>(255, 255, 0)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #ff00ff"></td>
+            <td>Magenta</td>
+            <td>Bright Magenta</td>
+            <td>#FF00FF</td>
+            <td>(255, 0, 255)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #00ffff"></td>
+            <td>Cyan</td>
+            <td>Bright Cyan</td>
+            <td>#00FFFF</td>
+            <td>(0, 255, 255)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #800000"></td>
+            <td>Maroon</td>
+            <td>Dark Red</td>
+            <td>#800000</td>
+            <td>(128, 0, 0)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #008000"></td>
+            <td>Dark Green</td>
+            <td>Dark Green</td>
+            <td>#008000</td>
+            <td>(0, 128, 0)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #000080"></td>
+            <td>Navy</td>
+            <td>Dark Blue</td>
+            <td>#000080</td>
+            <td>(0, 0, 128)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #808000"></td>
+            <td>Olive</td>
+            <td>Dark Yellow-Green</td>
+            <td>#808000</td>
+            <td>(128, 128, 0)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #800080"></td>
+            <td>Purple</td>
+            <td>Dark Purple</td>
+            <td>#800080</td>
+            <td>(128, 0, 128)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #008080"></td>
+            <td>Teal</td>
+            <td>Dark Cyan</td>
+            <td>#008080</td>
+            <td>(0, 128, 128)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #f5f5f5"></td>
+            <td>White Smoke</td>
+            <td>Light Gray</td>
+            <td>#F5F5F5</td>
+            <td>(245, 245, 245)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #d3d3d3"></td>
+            <td>Light Gray</td>
+            <td>Soft Light Gray</td>
+            <td>#D3D3D3</td>
+            <td>(211, 211, 211)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #a9a9a9"></td>
+            <td>Dark Gray</td>
+            <td>Dark Soft Gray</td>
+            <td>#A9A9A9</td>
+            <td>(169, 169, 169)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #808080"></td>
+            <td>Gray</td>
+            <td>Neutral Gray</td>
+            <td>#808080</td>
+            <td>(128, 128, 128)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #000000"></td>
+            <td>Black</td>
+            <td>Pure Black</td>
+            <td>#000000</td>
+            <td>(0, 0, 0)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #ff6347"></td>
+            <td>Tomato</td>
+            <td>Bright Red-Orange</td>
+            <td>#FF6347</td>
+            <td>(255, 99, 71)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #ff4500"></td>
+            <td>Orange Red</td>
+            <td>Intense Orange Red</td>
+            <td>#FF4500</td>
+            <td>(255, 69, 0)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #ffd700"></td>
+            <td>Gold</td>
+            <td>Golden Yellow</td>
+            <td>#FFD700</td>
+            <td>(255, 215, 0)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #adff2f"></td>
+            <td>Green Yellow</td>
+            <td>Yellow-Green</td>
+            <td>#ADFF2F</td>
+            <td>(173, 255, 47)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #7fff00"></td>
+            <td>Chartreuse</td>
+            <td>Vivid Yellow-Green</td>
+            <td>#7FFF00</td>
+            <td>(127, 255, 0)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #7cfc00"></td>
+            <td>Lawn Green</td>
+            <td>Bright Grass Green</td>
+            <td>#7CFC00</td>
+            <td>(124, 252, 0)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #98fb98"></td>
+            <td>Pale Green</td>
+            <td>Light Green</td>
+            <td>#98FB98</td>
+            <td>(152, 251, 152)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #00fa9a"></td>
+            <td>Medium Spring Green</td>
+            <td>Bright Cyan Green</td>
+            <td>#00FA9A</td>
+            <td>(0, 250, 154)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #00ff7f"></td>
+            <td>Spring Green</td>
+            <td>Bright Spring Green</td>
+            <td>#00FF7F</td>
+            <td>(0, 255, 127)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #008000"></td>
+            <td>Green</td>
+            <td>Pure Green</td>
+            <td>#008000</td>
+            <td>(0, 128, 0)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #228b22"></td>
+            <td>Forest Green</td>
+            <td>Dark Green</td>
+            <td>#228B22</td>
+            <td>(34, 139, 34)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #006400"></td>
+            <td>Dark Green</td>
+            <td>Deep Green</td>
+            <td>#006400</td>
+            <td>(0, 100, 0)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #2e8b57"></td>
+            <td>Sea Green</td>
+            <td>Greenish Blue</td>
+            <td>#2E8B57</td>
+            <td>(46, 139, 87)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #20b2aa"></td>
+            <td>Light Sea Green</td>
+            <td>Light Greenish Blue</td>
+            <td>#20B2AA</td>
+            <td>(32, 178, 170)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #add8e6"></td>
+            <td>Light Blue</td>
+            <td>Soft Blue</td>
+            <td>#ADD8E6</td>
+            <td>(173, 216, 230)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #87ceeb"></td>
+            <td>Sky Blue</td>
+            <td>Light Sky Blue</td>
+            <td>#87CEEB</td>
+            <td>(135, 206, 235)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #4682b4"></td>
+            <td>Steel Blue</td>
+            <td>Cool Blue</td>
+            <td>#4682B4</td>
+            <td>(70, 130, 180)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #5f9ea0"></td>
+            <td>Cadet Blue</td>
+            <td>Grayish Blue</td>
+            <td>#5F9EA0</td>
+            <td>(95, 158, 160)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #2f4f4f"></td>
+            <td>Dark Slate Gray</td>
+            <td>Dark Grayish Green</td>
+            <td>#2F4F4F</td>
+            <td>(47, 79, 79)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #00bfff"></td>
+            <td>Deep Sky Blue</td>
+            <td>Bright Sky Blue</td>
+            <td>#00BFFF</td>
+            <td>(0, 191, 255)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #1e90ff"></td>
+            <td>Dodger Blue</td>
+            <td>Vivid Blue</td>
+            <td>#1E90FF</td>
+            <td>(30, 144, 255)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #4169e1"></td>
+            <td>Royal Blue</td>
+            <td>Deep Blue</td>
+            <td>#4169E1</td>
+            <td>(65, 105, 225)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #0000cd"></td>
+            <td>Medium Blue</td>
+            <td>Pure Blue</td>
+            <td>#0000CD</td>
+            <td>(0, 0, 205)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #00008b"></td>
+            <td>Dark Blue</td>
+            <td>Deep Blue</td>
+            <td>#00008B</td>
+            <td>(0, 0, 139)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #000080"></td>
+            <td>Navy Blue</td>
+            <td>Deep Dark Blue</td>
+            <td>#000080</td>
+            <td>(0, 0, 128)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #8b0000"></td>
+            <td>Dark Red</td>
+            <td>Deep Red</td>
+            <td>#8B0000</td>
+            <td>(139, 0, 0)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #b22222"></td>
+            <td>Firebrick</td>
+            <td>Dark Red-Orange</td>
+            <td>#B22222</td>
+            <td>(178, 34, 34)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #ff7f50"></td>
+            <td>Coral</td>
+            <td>Light Orange Red</td>
+            <td>#FF7F50</td>
+            <td>(255, 127, 80)</td>
+          </tr>
+          <tr>
+            <td style="background-color: #ff6347"></td>
+            <td>Tomato</td>
+            <td>Bright Red-Orange</td>
+            <td>#FF6347</td>
+            <td>(255, 99, 71)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <script>
+      function convertToHex() {
+        const red = parseInt(document.getElementById('red').value) || 0
+        const green = parseInt(document.getElementById('green').value) || 0
+        const blue = parseInt(document.getElementById('blue').value) || 0
+
+        if (
+          red < 0 ||
+          red > 255 ||
+          green < 0 ||
+          green > 255 ||
+          blue < 0 ||
+          blue > 255
+        ) {
+          alert('Please enter values between 0 and 255 for each color.')
+          return
+        }
+
+        const hex = `#${red.toString(16).padStart(2, '0')}${green
+          .toString(16)
+          .padStart(2, '0')}${blue.toString(16).padStart(2, '0')}`.toUpperCase()
+        document.getElementById('result').textContent = `Hex Code: ${hex}`
+        document.getElementById('colorPreview').style.backgroundColor = hex
+      }
+
+      function convertToRGB() {
+        const hex = document.getElementById('hex').value.trim()
+
+        const fullHex = hex.startsWith('#') ? hex.slice(1) : hex
+        const expandedHex =
+          fullHex.length === 3
+            ? fullHex
+                .split('')
+                .map((char) => char + char)
+                .join('')
+            : fullHex
+
+        if (!/^[0-9a-fA-F]{6}$/.test(expandedHex)) {
+          alert('Please enter a valid hex code in the format #RRGGBB or #RGB.')
+          return
+        }
+
+        const red = parseInt(expandedHex.slice(0, 2), 16)
+        const green = parseInt(expandedHex.slice(2, 4), 16)
+        const blue = parseInt(expandedHex.slice(4, 6), 16)
+
+        document.getElementById(
+          'result'
+        ).textContent = `RGB: (${red}, ${green}, ${blue})`
+        document.getElementById(
+          'colorPreview'
+        ).style.backgroundColor = `#${expandedHex}`
+      }
+
+      document.addEventListener('paste', (event) => {
+        const pasteText = (event.clipboardData || window.clipboardData)
+          .getData('text')
+          .trim()
+        const rgbMatch = pasteText.match(
+          /^\(?\s*(\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\s*\)?$/
+        )
+        const hexMatch = pasteText.match(/^#?[0-9a-fA-F]{3,6}$/)
+
+        if (rgbMatch) {
+          document.getElementById('red').value = rgbMatch[1]
+          document.getElementById('green').value = rgbMatch[2]
+          document.getElementById('blue').value = rgbMatch[3]
+          convertToHex()
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+        } else if (hexMatch) {
+          document.getElementById('hex').value = pasteText.startsWith('#')
+            ? pasteText
+            : `#${pasteText}`
+          convertToRGB()
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+        }
+      })
+
+      function copyToClipboard() {
+        const resultText = document.getElementById('result').textContent
+        if (resultText.includes(':')) {
+          const valueToCopy = resultText.split(': ')[1]
+          navigator.clipboard.writeText(valueToCopy).then(
+            () => {
+              alert('Copied to clipboard: ' + valueToCopy)
+            },
+            () => {
+              alert('Failed to copy to clipboard.')
+            }
+          )
+        }
+      }
+    </script>
+  </body>
+</html>
